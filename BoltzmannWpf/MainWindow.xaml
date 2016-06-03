@@ -69,7 +69,7 @@
                 <GroupBox Header="Uczenie maszynowe" Grid.Row="0" Grid.Column="0" Margin="10">
                     <StackPanel Margin="10">
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <Button Content="Wybierz plik uczący"/>
+                            <Button Content="Wybierz plik uczący" Click="SelectLearnFileButton_Click"/>
                             <Label x:Name="LearnFileLocation"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="2">
@@ -84,7 +84,7 @@
                             <TextBox Text="{Binding ElementName=slider2Value, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
                         </StackPanel>
 
-                        <Button Content="Ucz!" Width="300" Margin="10"/>
+                        <Button Content="Ucz!" Click="LearnButton_Click" Width="300" Margin="10"/>
                     </StackPanel>
                 </GroupBox>
 
