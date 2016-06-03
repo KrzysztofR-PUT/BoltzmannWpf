@@ -1,4 +1,7 @@
-﻿using Microsoft.Win32;
+﻿using BoltzmannMachine;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,12 +23,17 @@ namespace BoltzmannWpf
     public partial class MainWindow : Window
     {
         private String patternFilePath = "";
-        private String learnFilePath = "";
+        Matrix<double> data;
+        string[] lines;
+        double sliderspeed;
+        int sliderrepeat;
+        TrainMachine tr;
 
         #region CanvasProperties
         private int canvasRowsAndColumns = 5;
         private int rectangleHeigth = 26;
         private int rectangleWidth = 26;
+
 
         private SolidColorBrush blackColor = new SolidColorBrush(Colors.Black);
         private SolidColorBrush whiteColor = new SolidColorBrush(Colors.White);
@@ -33,9 +41,10 @@ namespace BoltzmannWpf
 
         public MainWindow()
         {
+
             InitializeComponent();
-            setupCanvas();
-            
+           
+            setupCanvas(Canvas1);
         }
 
         #region Button Methods
@@ -43,7 +52,7 @@ namespace BoltzmannWpf
         private void CleanButton_Click(object sender, RoutedEventArgs e)
         {
             Canvas1.Children.Clear();
-            setupCanvas();
+            setupCanvas(Canvas1);
         }
         private void SelectFileButton_Click(object sender, RoutedEventArgs e)
         {
@@ -66,7 +75,7 @@ namespace BoltzmannWpf
                     writer.WriteLine(item.Content.ToString());
 
                     String resultString = "";
-                    List<int> canvasList = canvasToList();
+                    List<int> canvasList = canvasToList(Canvas1);
                     foreach (int element in canvasList)
                     {
                         resultString += element.ToString() + " ";
@@ -80,7 +89,7 @@ namespace BoltzmannWpf
                     if(rowsFromFile == canvasRowsAndColumns)
                     {
                         String resultString = "";
-                        List<int> canvasList = canvasToList();
+                        List<int> canvasList = canvasToList(Canvas1);
                         foreach (int element in canvasList)
                         {
                             resultString += element.ToString() + " ";
@@ -150,6 +159,28 @@ namespace BoltzmannWpf
         #endregion
 
         #region Changed Methods
+
+
+        private void Sliderspeed_ValueChanged(object sender,RoutedPropertyChangedEventArgs<double> e)
+        {
+            // ... Get Slider reference.
+            var slider = sender as Slider;
+            // ... Get Value.
+            sliderspeed = slider.Value;
+            // ... Set Window Title.
+           
+        }
+
+        private void Sliderrepeat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // ... Get Slider reference.
+            var slider = sender as Slider;
+            // ... Get Value.
+            sliderrepeat = (int)slider.Value;
+            // ... Set Window Title.
+
+        }
+
         private void canvasSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBoxItem item = (ComboBoxItem)sizeComboBox.SelectedValue;
@@ -159,18 +190,48 @@ namespace BoltzmannWpf
 
                 canvasRowsAndColumns = Convert.ToInt32(selectedSize);
                 Canvas1.Children.Clear();
-                setupCanvas();
+                setupCanvas(Canvas1);
+            }
+        }
+
+     
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (tabItem2.IsSelected)
+                {
+                    patternFilePath = "";
+                  
+                   // setupCanvas(Canvas2);
+                   //  setupCanvas(Canvas3);
+                }
+                if (tabItem1.IsSelected)
+                {
+                    patternFilePath = "";
+                    // setupCanvas(Canvas2);
+                    //  setupCanvas(Canvas3);
+                }
+
+
+
+            }
+            catch(Exception w)
+            {
+
+
             }
         }
         #endregion
 
         #region Canvas Methods
-        private List<int> canvasToList()
+        private List<int> canvasToList(Canvas canv)
         {
             List<int> resultList = new List<int>();
             List<Rectangle> listofrectangles = new List<Rectangle>();
 
-            foreach (var element in Canvas1.Children)
+            foreach (var element in canv.Children)
             {
                 if (element is Rectangle)
                 {
@@ -188,10 +249,10 @@ namespace BoltzmannWpf
 
             return resultList;
         }
-        private void setupCanvas()
+        private void setupCanvas(Canvas Canvas)
         {
-            Canvas1.Height = rectangleHeigth * canvasRowsAndColumns;
-            Canvas1.Width = rectangleWidth * canvasRowsAndColumns;
+            Canvas.Height = rectangleHeigth * canvasRowsAndColumns;
+            Canvas.Width = rectangleWidth * canvasRowsAndColumns;
 
             for (int i=0; i<canvasRowsAndColumns; i++)
             {
@@ -210,7 +271,7 @@ namespace BoltzmannWpf
 
                     Canvas.SetLeft(rectangle, i * rectangleWidth);
                     Canvas.SetTop(rectangle, j * rectangleHeigth);
-                    Canvas1.Children.Add(rectangle);
+                    Canvas.Children.Add(rectangle);
                 }
             }
         }
@@ -227,5 +288,127 @@ namespace BoltzmannWpf
             }
         }
         #endregion
+
+        private void pickfile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Filter = "Text files (*.txt)|*.txt";
+            if (openFile.ShowDialog() == true)
+            {
+                FileLocation.Content = openFile.FileName;
+                patternFilePath = openFile.FileName;
+            }
+
+            if (patternFilePath != "")
+            {
+                using (StreamReader sr = new StreamReader(patternFilePath))
+                {
+                    // Read the stream to a string, and write the string to the console.
+                    lines = sr.ReadToEnd().Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+                 //   lines2 = new string[lines.Count()];
+
+                    for(int i=0;i<lines.Count();i++)
+                    {
+                        lines[i]= lines.ElementAt(i).Replace(" ", String.Empty);
+
+                    }
+
+                    canvasRowsAndColumns = Convert.ToInt32(lines.ElementAt(0));
+                    lines = lines.Where(w => w != lines[0]).ToArray();
+                    setupCanvas(Canvas2);
+                    setupCanvas(Canvas3);
+                }
+              
+            }
+            else
+                MessageBox.Show("Wybierz plik uczący");
+
+
+        }
+
+        private void learn_button_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (patternFilePath != "")
+            {
+                tr = new TrainMachine(canvasRowsAndColumns * canvasRowsAndColumns,lines.Count()-1);
+
+                double[,] todata = new double[canvasRowsAndColumns, canvasRowsAndColumns];
+
+                double[,] alldata= new double[lines.Count(), canvasRowsAndColumns* canvasRowsAndColumns];
+                int pom;
+
+                for (int i=0;i<lines.Count();i++)
+                {
+                    pom = 0;
+                    for (int z=0;z<canvasRowsAndColumns;z++)
+                    {
+
+                        for (int y = 0; y < canvasRowsAndColumns; y++)
+                        {
+
+                            if (y > 0)
+                            {
+                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y * canvasRowsAndColumns + z).ToString());
+                                alldata[i, pom] = todata[z, y];
+                                pom++;
+                            }
+                            else
+                            {
+                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y + z).ToString());
+                                alldata[i, pom] = todata[z, y];
+                                pom++;
+                            }
+                        }
+                    }
+
+                   
+                }
+
+                data = DenseMatrix.OfArray(alldata);
+
+                tr.train(data, sliderrepeat, sliderspeed);
+
+                MessageBox.Show("Nauczono");
+
+
+
+            }
+            else
+                MessageBox.Show("Wybierz plik uczący");
+
+        }
+
+        private void clearbutt_Click(object sender, RoutedEventArgs e)
+        {
+            Canvas2.Children.Clear();
+            setupCanvas(Canvas2);
+
+            Canvas3.Children.Clear();
+            setupCanvas(Canvas3);
+        }
+
+        private void Symulation_butt_Click(object sender, RoutedEventArgs e)
+        {
+            
+
+            List<int> canvasList = canvasToList(Canvas2);
+            double[] tabletosim = new double[canvasList.Count()];
+            int pom=0;
+            for(int i=0;i< tabletosim.Count();i++)
+            {
+                if(i%canvasRowsAndColumns==0)
+                tabletosim[i] = canvasList.ElementAt(i);
+
+            }
+
+          
+
+          double[] result=(double[])DenseVector.OfArray(tr.simulation(tabletosim));
+
+            MessageBox.Show("Wybierz plik uczący");
+
+        }
     }
 }

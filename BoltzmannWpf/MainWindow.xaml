@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BoltzmannWpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="700" Background="Gray" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="483" Width="700" Background="Gray" MinHeight="483" MinWidth="700" MaxHeight="483" MaxWidth="700" WindowStartupLocation="CenterScreen">
 
-    <TabControl Margin="10,5,10,8">
+    <TabControl x:Name ="TabControls" Margin="10,5,10,8" SelectionChanged="TabControl_SelectionChanged">
         
-        <TabItem Header="Dodawanie kształtów" Width="200" Background="LightGray">
+        <TabItem x:Name="tabItem1" Header="Dodawanie kształtów" Width="200" Background="LightGray">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -56,7 +56,7 @@
             </Grid>
         </TabItem>
 
-        <TabItem Header="Wykorzystanie sieci neuronowej" Width="200" Background="LightGray">
+        <TabItem Name="tabItem2" Header="Wykorzystanie sieci neuronowej" Width="200" Background="LightGray">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -69,26 +69,59 @@
                 <GroupBox Header="Uczenie maszynowe" Grid.Row="0" Grid.Column="0" Margin="10">
                     <StackPanel Margin="10">
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <Button Content="Wybierz plik uczący" Click="SelectLearnFileButton_Click"/>
+                            <Button x:Name="pickfile" Content="Wybierz plik uczący" Click="pickfile_Click"/>
                             <Label x:Name="LearnFileLocation"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="2">
                             <Label Content="Liczba powtórzeń uczenia" Width="150"/>
-                            <Slider Width="200" Minimum="500" Maximum="5000"  TickFrequency="100" IsSnapToTickEnabled="True" Name="slider1Value" />
-                            <TextBox Text="{Binding ElementName=slider1Value, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
+                            <Slider Width="200" Minimum="500" Maximum="5000"  TickFrequency="100" IsSnapToTickEnabled="True" Name="slider1Valuerepeat" ValueChanged="Sliderrepeat_ValueChanged"/>
+                            <TextBox Text="{Binding ElementName=slider1Valuerepeat, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
                         </StackPanel>
                         
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <Label Content="Liczba neuronów ukrytych" Width="150"/>
-                            <Slider Width="200" Minimum="2" Maximum="10"  TickFrequency="1" IsSnapToTickEnabled="True" Name="slider2Value"/>
-                            <TextBox Text="{Binding ElementName=slider2Value, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
+                            <Label Content="Szybkość nauki" Width="150"/>
+                            <Slider Width="200" Minimum="0.1" Maximum="1"  TickFrequency="0.1" IsSnapToTickEnabled="True" Name="slider2Valuespeed" ValueChanged="Sliderspeed_ValueChanged"/>
+                            <TextBox Text="{Binding ElementName=slider2Valuespeed, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
                         </StackPanel>
 
-                        <Button Content="Ucz!" Click="LearnButton_Click" Width="300" Margin="10"/>
+                        <Button x:Name="learn_button" Content="Ucz!" Width="300" Margin="10" Click="learn_button_Click"/>
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Header="Rozpoznawanie kształtów?" Grid.Row="1" Grid.Column="0" Margin="10">
+                <GroupBox Header="Rozpoznawanie kształtów" Grid.Row="1" Grid.Column="0" Margin="10,10,10,0">
+                    <StackPanel x:Name="stack1" Orientation="Horizontal" Margin="0,0,0,-93">
+                        <Border BorderThickness="3" BorderBrush="Black" Margin="25, 0, 5, 100" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Canvas  x:Name="Canvas2" />
+                        </Border>
+                        <Button x:Name="Symulation_butt" Content="Symuluj" Width="65" Margin="100,76,0,169" RenderTransformOrigin="0.5,0.5" Click="Symulation_butt_Click">
+                            <Button.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="359.395"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Button.RenderTransform>
+                        </Button>
+
+                        <Button x:Name="clearbutt" Content="Wyczyść" Width="65" Margin="-65,117,0,128" RenderTransformOrigin="0.5,0.5" Click="clearbutt_Click">
+                            <Button.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="359.395"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Button.RenderTransform>
+                        </Button>
+
+                        <Border BorderThickness="3" BorderBrush="Black" Margin="100,5,0,100" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Canvas  x:Name="Canvas3" />
+                        </Border>
+
+                    </StackPanel>
+
+
                     
                 </GroupBox>
             </Grid>
