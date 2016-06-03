@@ -23,6 +23,7 @@ namespace BoltzmannWpf
     public partial class MainWindow : Window
     {
         private String patternFilePath = "";
+        private String learnFilePath = "";
         Matrix<double> data;
         string[] lines;
         double sliderspeed;
@@ -120,42 +121,131 @@ namespace BoltzmannWpf
             }
         }
 
-        //=====================tab2=======================
-        private void SelectLearnFileButton_Click(object sender, RoutedEventArgs e)
+        
+
+        private void pickfile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Filter = "Text files (*.txt)|*.txt";
             if (openFile.ShowDialog() == true)
             {
-                LearnFileLocation.Content = openFile.FileName;
-                learnFilePath = openFile.FileName;
+                FileLocation.Content = openFile.FileName;
+                patternFilePath = openFile.FileName;
             }
-        }
-        private void LearnButton_Click(object sender, RoutedEventArgs e)
-        {
-            //dla Adusia komenty, pozniej mozesz je wywalic
 
-            if (learnFilePath != "") //sprawdza czy wybrany jest plik, jak nie to messageBox wyjezdza
+            if (patternFilePath != "")
             {
-                if (new FileInfo(learnFilePath).Length != 0) //sprawdza czy nie jest pusty
+                using (StreamReader sr = new StreamReader(patternFilePath))
                 {
-                    int hidden = Convert.ToInt32(slider2Value.Value);   //liczba neuronow ukrytych (2-10)
-                    int reps = Convert.ToInt32(slider1Value.Value);     //liczba powtorzen (500-5000)
+                    // Read the stream to a string, and write the string to the console.
+                    lines = sr.ReadToEnd().Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-                    //========================================
-                    //Tutaj zrob to zczytanie pliku tekstowego,
-                    //ścieżka do niego jest w learnFilePath
-                    //========================================
+                  
 
-                } else
-                {
-                    MessageBox.Show("Plik uczący jest pusty!","Błąd", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    for (int i = 0; i < lines.Count(); i++)
+                    {
+                        lines[i] = lines.ElementAt(i).Replace(" ", String.Empty);
+
+                    }
+
+                    canvasRowsAndColumns = Convert.ToInt32(lines.ElementAt(0));
+                    lines = lines.Where(w => w != lines[0]).ToArray();
+                    setupCanvas(Canvas2);
+                    setupCanvas(Canvas3);
                 }
-            } else
-            {
-                MessageBox.Show("Wybierz plik uczący!", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+
             }
+            else
+                MessageBox.Show("Wybierz plik uczący");
+
+
         }
+
+
+        private void learn_button_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (patternFilePath != "")
+            {
+                tr = new TrainMachine(canvasRowsAndColumns * canvasRowsAndColumns, lines.Count() - 1);
+
+                double[,] todata = new double[canvasRowsAndColumns, canvasRowsAndColumns];
+
+                double[,] alldata = new double[lines.Count(), canvasRowsAndColumns * canvasRowsAndColumns];
+                int pom;
+
+                for (int i = 0; i < lines.Count(); i++)
+                {
+                    pom = 0;
+                    for (int z = 0; z < canvasRowsAndColumns; z++)
+                    {
+
+                        for (int y = 0; y < canvasRowsAndColumns; y++)
+                        {
+
+                            if (y > 0)
+                            {
+                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y * canvasRowsAndColumns + z).ToString());
+                                alldata[i, pom] = todata[z, y];
+                                pom++;
+                            }
+                            else
+                            {
+                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y + z).ToString());
+                                alldata[i, pom] = todata[z, y];
+                                pom++;
+                            }
+                        }
+                    }
+
+
+                }
+
+                data = DenseMatrix.OfArray(alldata);
+
+                tr.train(data, sliderrepeat, sliderspeed);
+
+                MessageBox.Show("Nauczono");
+
+
+
+            }
+            else
+                MessageBox.Show("Wybierz plik uczący");
+
+        }
+        //tab2
+        private void clearbutt_Click(object sender, RoutedEventArgs e)
+        {
+            Canvas2.Children.Clear();
+            setupCanvas(Canvas2);
+
+            Canvas3.Children.Clear();
+            setupCanvas(Canvas3);
+        }
+
+        private void Symulation_butt_Click(object sender, RoutedEventArgs e)
+        {
+
+
+            List<int> canvasList = canvasToList(Canvas2);
+            double[] tabletosim = new double[canvasList.Count()];
+            int pom = 0;
+            for (int i = 0; i < tabletosim.Count(); i++)
+            {
+                if (i % canvasRowsAndColumns == 0)
+                    tabletosim[i] = canvasList.ElementAt(i);   //tu trzea poprawic zczytywanie z tej listy
+
+            }
+
+
+
+            double[] result = (double[])DenseVector.OfArray(tr.simulation(tabletosim));
+
+
+
+        }
+
         #endregion
 
         #region Changed Methods
@@ -289,126 +379,12 @@ namespace BoltzmannWpf
         }
         #endregion
 
-        private void pickfile_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.Filter = "Text files (*.txt)|*.txt";
-            if (openFile.ShowDialog() == true)
-            {
-                FileLocation.Content = openFile.FileName;
-                patternFilePath = openFile.FileName;
-            }
+      
 
-            if (patternFilePath != "")
-            {
-                using (StreamReader sr = new StreamReader(patternFilePath))
-                {
-                    // Read the stream to a string, and write the string to the console.
-                    lines = sr.ReadToEnd().Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+       
 
-                 //   lines2 = new string[lines.Count()];
+        
 
-                    for(int i=0;i<lines.Count();i++)
-                    {
-                        lines[i]= lines.ElementAt(i).Replace(" ", String.Empty);
-
-                    }
-
-                    canvasRowsAndColumns = Convert.ToInt32(lines.ElementAt(0));
-                    lines = lines.Where(w => w != lines[0]).ToArray();
-                    setupCanvas(Canvas2);
-                    setupCanvas(Canvas3);
-                }
-              
-            }
-            else
-                MessageBox.Show("Wybierz plik uczący");
-
-
-        }
-
-        private void learn_button_Click(object sender, RoutedEventArgs e)
-        {
-
-            if (patternFilePath != "")
-            {
-                tr = new TrainMachine(canvasRowsAndColumns * canvasRowsAndColumns,lines.Count()-1);
-
-                double[,] todata = new double[canvasRowsAndColumns, canvasRowsAndColumns];
-
-                double[,] alldata= new double[lines.Count(), canvasRowsAndColumns* canvasRowsAndColumns];
-                int pom;
-
-                for (int i=0;i<lines.Count();i++)
-                {
-                    pom = 0;
-                    for (int z=0;z<canvasRowsAndColumns;z++)
-                    {
-
-                        for (int y = 0; y < canvasRowsAndColumns; y++)
-                        {
-
-                            if (y > 0)
-                            {
-                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y * canvasRowsAndColumns + z).ToString());
-                                alldata[i, pom] = todata[z, y];
-                                pom++;
-                            }
-                            else
-                            {
-                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y + z).ToString());
-                                alldata[i, pom] = todata[z, y];
-                                pom++;
-                            }
-                        }
-                    }
-
-                   
-                }
-
-                data = DenseMatrix.OfArray(alldata);
-
-                tr.train(data, sliderrepeat, sliderspeed);
-
-                MessageBox.Show("Nauczono");
-
-
-
-            }
-            else
-                MessageBox.Show("Wybierz plik uczący");
-
-        }
-
-        private void clearbutt_Click(object sender, RoutedEventArgs e)
-        {
-            Canvas2.Children.Clear();
-            setupCanvas(Canvas2);
-
-            Canvas3.Children.Clear();
-            setupCanvas(Canvas3);
-        }
-
-        private void Symulation_butt_Click(object sender, RoutedEventArgs e)
-        {
-            
-
-            List<int> canvasList = canvasToList(Canvas2);
-            double[] tabletosim = new double[canvasList.Count()];
-            int pom=0;
-            for(int i=0;i< tabletosim.Count();i++)
-            {
-                if(i%canvasRowsAndColumns==0)
-                tabletosim[i] = canvasList.ElementAt(i);
-
-            }
-
-          
-
-          double[] result=(double[])DenseVector.OfArray(tr.simulation(tabletosim));
-
-            MessageBox.Show("Wybierz plik uczący");
-
-        }
+       
     }
 }

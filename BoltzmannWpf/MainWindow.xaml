@@ -8,7 +8,7 @@
         Title="MainWindow" Height="483" Width="700" Background="Gray" MinHeight="483" MinWidth="700" MaxHeight="483" MaxWidth="700" WindowStartupLocation="CenterScreen">
 
     <TabControl x:Name ="TabControls" Margin="10,5,10,8" SelectionChanged="TabControl_SelectionChanged">
-        
+
         <TabItem x:Name="tabItem1" Header="Dodawanie kształtów" Width="200" Background="LightGray">
             <Grid>
                 <Grid.RowDefinitions>
@@ -77,7 +77,7 @@
                             <Slider Width="200" Minimum="500" Maximum="5000"  TickFrequency="100" IsSnapToTickEnabled="True" Name="slider1Valuerepeat" ValueChanged="Sliderrepeat_ValueChanged"/>
                             <TextBox Text="{Binding ElementName=slider1Valuerepeat, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
                         </StackPanel>
-                        
+
                         <StackPanel Orientation="Horizontal" Margin="2">
                             <Label Content="Szybkość nauki" Width="150"/>
                             <Slider Width="200" Minimum="0.1" Maximum="1"  TickFrequency="0.1" IsSnapToTickEnabled="True" Name="slider2Valuespeed" ValueChanged="Sliderspeed_ValueChanged"/>
@@ -122,7 +122,7 @@
                     </StackPanel>
 
 
-                    
+
                 </GroupBox>
             </Grid>
         </TabItem>
