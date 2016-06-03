@@ -20,6 +20,7 @@ namespace BoltzmannWpf
     public partial class MainWindow : Window
     {
         private String patternFilePath = "";
+        private String learnFilePath = "";
 
         #region CanvasProperties
         private int canvasRowsAndColumns = 5;
@@ -34,9 +35,11 @@ namespace BoltzmannWpf
         {
             InitializeComponent();
             setupCanvas();
+            
         }
 
         #region Button Methods
+        //=====================tab1=======================
         private void CleanButton_Click(object sender, RoutedEventArgs e)
         {
             Canvas1.Children.Clear();
@@ -89,12 +92,12 @@ namespace BoltzmannWpf
                     }
                     else
                     {
-                        MessageBox.Show("Wielkość tablicy musi być równa wielkości tablic w pliku. Wielkość w pliku wynosi " + rowsFromFile.ToString());
+                        MessageBox.Show("Wielkość tablicy musi być równa wielkości tablic w pliku. Wielkość tablicy w pliku wynosi " + rowsFromFile.ToString() + ".", "Błąd", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
             } else
             {
-                MessageBox.Show("Wybierz plik uczący");
+                MessageBox.Show("Wybierz plik uczący","Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private void DeletePatternsButton_Click(object sender, RoutedEventArgs e)
@@ -104,7 +107,44 @@ namespace BoltzmannWpf
                 File.WriteAllText(patternFilePath, String.Empty);
             } else
             {
-                MessageBox.Show("Wybierz plik uczący");
+                MessageBox.Show("Wybierz plik uczący", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        //=====================tab2=======================
+        private void SelectLearnFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Filter = "Text files (*.txt)|*.txt";
+            if (openFile.ShowDialog() == true)
+            {
+                LearnFileLocation.Content = openFile.FileName;
+                learnFilePath = openFile.FileName;
+            }
+        }
+        private void LearnButton_Click(object sender, RoutedEventArgs e)
+        {
+            //dla Adusia komenty, pozniej mozesz je wywalic
+
+            if (learnFilePath != "") //sprawdza czy wybrany jest plik, jak nie to messageBox wyjezdza
+            {
+                if (new FileInfo(learnFilePath).Length != 0) //sprawdza czy nie jest pusty
+                {
+                    int hidden = Convert.ToInt32(slider2Value.Value);   //liczba neuronow ukrytych (2-10)
+                    int reps = Convert.ToInt32(slider1Value.Value);     //liczba powtorzen (500-5000)
+
+                    //========================================
+                    //Tutaj zrob to zczytanie pliku tekstowego,
+                    //ścieżka do niego jest w learnFilePath
+                    //========================================
+
+                } else
+                {
+                    MessageBox.Show("Plik uczący jest pusty!","Błąd", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+            } else
+            {
+                MessageBox.Show("Wybierz plik uczący!", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         #endregion
