@@ -125,13 +125,13 @@ namespace BoltzmannWpf
             openFile.Filter = "Text files (*.txt)|*.txt";
             if (openFile.ShowDialog() == true)
             {
-                FileLocation.Content = openFile.FileName;
-                patternFilePath = openFile.FileName;
+                LearnFileLocation.Content = openFile.FileName;
+                learnFilePath = openFile.FileName;
             }
 
-            if (patternFilePath != "")
+            if (learnFilePath != "")
             {
-                using (StreamReader sr = new StreamReader(patternFilePath))
+                using (StreamReader sr = new StreamReader(learnFilePath))
                 {
                     // Read the stream to a string, and write the string to the console.
                     lines = sr.ReadToEnd().Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);                  
@@ -161,7 +161,7 @@ namespace BoltzmannWpf
 
         private void learn_button_Click(object sender, RoutedEventArgs e)
         {
-            if (patternFilePath != "")
+            if (learnFilePath != "")
             {
                 tr = new TrainMachine(canvasRowsAndColumns * canvasRowsAndColumns, sliderhiddenval);
 
