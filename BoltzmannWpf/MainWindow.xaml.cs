@@ -27,8 +27,10 @@ namespace BoltzmannWpf
         Matrix<double> data;
         string[] lines;
         double sliderspeed;
+        int sliderhiddenval;
         int sliderrepeat;
         TrainMachine tr;
+        int click_pom = 0;
 
         #region CanvasProperties
         private int canvasRowsAndColumns = 5;
@@ -125,6 +127,7 @@ namespace BoltzmannWpf
 
         private void pickfile_Click(object sender, RoutedEventArgs e)
         {
+            click_pom = 0;
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Filter = "Text files (*.txt)|*.txt";
             if (openFile.ShowDialog() == true)
@@ -147,11 +150,16 @@ namespace BoltzmannWpf
                         lines[i] = lines.ElementAt(i).Replace(" ", String.Empty);
 
                     }
+                    if(Canvas2!=null && Canvas3!=null)
+                    {
+                        Canvas3.Children.Clear();
+                        Canvas2.Children.Clear();
+                    }
 
                     canvasRowsAndColumns = Convert.ToInt32(lines.ElementAt(0));
                     lines = lines.Where(w => w != lines[0]).ToArray();
                     setupCanvas(Canvas2);
-                    setupCanvas(Canvas3);
+                    setupCanvaswithcolor(Canvas3,new double[canvasRowsAndColumns*canvasRowsAndColumns]);
                 }
 
             }
@@ -167,7 +175,7 @@ namespace BoltzmannWpf
 
             if (patternFilePath != "")
             {
-                tr = new TrainMachine(canvasRowsAndColumns * canvasRowsAndColumns, lines.Count() - 1);
+                tr = new TrainMachine(canvasRowsAndColumns * canvasRowsAndColumns, sliderhiddenval);
 
                 double[,] todata = new double[canvasRowsAndColumns, canvasRowsAndColumns];
 
@@ -176,25 +184,20 @@ namespace BoltzmannWpf
 
                 for (int i = 0; i < lines.Count(); i++)
                 {
+
                     pom = 0;
+
+                    
                     for (int z = 0; z < canvasRowsAndColumns; z++)
                     {
 
                         for (int y = 0; y < canvasRowsAndColumns; y++)
                         {
 
-                            if (y > 0)
-                            {
-                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y * canvasRowsAndColumns + z).ToString());
+                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(pom).ToString());
                                 alldata[i, pom] = todata[z, y];
                                 pom++;
-                            }
-                            else
-                            {
-                                todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(y + z).ToString());
-                                alldata[i, pom] = todata[z, y];
-                                pom++;
-                            }
+                         
                         }
                     }
 
@@ -204,7 +207,7 @@ namespace BoltzmannWpf
                 data = DenseMatrix.OfArray(alldata);
 
                 tr.train(data, sliderrepeat, sliderspeed);
-
+                click_pom = 1;
                 MessageBox.Show("Nauczono");
 
 
@@ -221,28 +224,33 @@ namespace BoltzmannWpf
             setupCanvas(Canvas2);
 
             Canvas3.Children.Clear();
-            setupCanvas(Canvas3);
+            setupCanvaswithcolor(Canvas3, new double[canvasRowsAndColumns * canvasRowsAndColumns]);
+
         }
 
         private void Symulation_butt_Click(object sender, RoutedEventArgs e)
         {
-
-
-            List<int> canvasList = canvasToList(Canvas2);
-            double[] tabletosim = new double[canvasList.Count()];
-            int pom = 0;
-            for (int i = 0; i < tabletosim.Count(); i++)
+            if (click_pom == 1)
             {
-                if (i % canvasRowsAndColumns == 0)
-                    tabletosim[i] = canvasList.ElementAt(i);   //tu trzea poprawic zczytywanie z tej listy
+                double[,] todata = new double[canvasRowsAndColumns, canvasRowsAndColumns];
+                List<int> canvasList = canvasToList(Canvas2);
+                double[] tabletosim = new double[canvasList.Count()];
 
+                for (int i = 0; i < tabletosim.Count(); i++)
+                    tabletosim[i] = canvasList.ElementAt(i);
+
+
+
+                double[] result = (double[])DenseVector.OfArray(tr.simulation(tabletosim));
+
+
+                Canvas3.Children.Clear();
+
+                setupCanvaswithcolor(Canvas3, result);
             }
-
-
-
-            double[] result = (double[])DenseVector.OfArray(tr.simulation(tabletosim));
-
-
+            else
+                MessageBox.Show("Naucz sieć");
+           
 
         }
 
@@ -259,6 +267,16 @@ namespace BoltzmannWpf
             sliderspeed = slider.Value;
             // ... Set Window Title.
            
+        }
+
+        private void Sliderhidden_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // ... Get Slider reference.
+            var slider = sender as Slider;
+            // ... Get Value.
+            sliderhiddenval =(int) slider.Value;
+            // ... Set Window Title.
+
         }
 
         private void Sliderrepeat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -339,6 +357,40 @@ namespace BoltzmannWpf
 
             return resultList;
         }
+
+
+        private void setupCanvaswithcolor(Canvas Canvas,double[] tab)
+        {
+            Canvas.Height = rectangleHeigth * canvasRowsAndColumns;
+            Canvas.Width = rectangleWidth * canvasRowsAndColumns;
+            int licz = 0;
+            for (int i = 0; i < canvasRowsAndColumns; i++)
+            {
+                for (int j = 0; j < canvasRowsAndColumns; j++)
+                {
+                    Rectangle rectangle = new Rectangle();
+
+          
+                    rectangle.Height = rectangleHeigth;
+                    rectangle.Width = rectangleWidth;
+
+                    if(tab[licz]==1)
+                    rectangle.Fill =blackColor;
+                    else
+                    rectangle.Fill = whiteColor;
+
+
+                    rectangle.Stroke = blackColor;
+                    rectangle.StrokeThickness = 1;
+
+                    Canvas.SetLeft(rectangle, j * rectangleWidth);
+                    Canvas.SetTop(rectangle, i * rectangleHeigth);
+                    Canvas.Children.Add(rectangle);
+                    licz++;
+                }
+            }
+        }
+
         private void setupCanvas(Canvas Canvas)
         {
             Canvas.Height = rectangleHeigth * canvasRowsAndColumns;
@@ -359,8 +411,8 @@ namespace BoltzmannWpf
                     rectangle.Stroke = blackColor;
                     rectangle.StrokeThickness = 1;
 
-                    Canvas.SetLeft(rectangle, i * rectangleWidth);
-                    Canvas.SetTop(rectangle, j * rectangleHeigth);
+                    Canvas.SetLeft(rectangle, j * rectangleWidth);
+                    Canvas.SetTop(rectangle, i * rectangleHeigth);
                     Canvas.Children.Add(rectangle);
                 }
             }

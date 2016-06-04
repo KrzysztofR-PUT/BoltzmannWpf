@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BoltzmannWpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="483" Width="700" Background="Gray" MinHeight="483" MinWidth="700" MaxHeight="483" MaxWidth="700" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="524" Width="686.066" Background="Gray" MinHeight="524" MinWidth="700" MaxHeight="524" MaxWidth="700" WindowStartupLocation="CenterScreen">
 
     <TabControl x:Name ="TabControls" Margin="10,5,10,8" SelectionChanged="TabControl_SelectionChanged">
 
@@ -83,17 +83,21 @@
                             <Slider Width="200" Minimum="0.1" Maximum="1"  TickFrequency="0.1" IsSnapToTickEnabled="True" Name="slider2Valuespeed" ValueChanged="Sliderspeed_ValueChanged"/>
                             <TextBox Text="{Binding ElementName=slider2Valuespeed, Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
                         </StackPanel>
-
-                        <Button x:Name="learn_button" Content="Ucz!" Width="300" Margin="10" Click="learn_button_Click"/>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <Label Content="Ilość neuronów ukrytych" Width="150"/>
+                            <Slider Width="200" Minimum="2" Maximum="9"  TickFrequency="1" IsSnapToTickEnabled="True" x:Name="sliderhidden" ValueChanged="Sliderhidden_ValueChanged"/>
+                            <TextBox Text="{Binding Value, ElementName=sliderhidden, UpdateSourceTrigger=PropertyChanged}" Width="40" IsReadOnly="True"/>
+                        </StackPanel>
+                        <Button x:Name="learn_button" Content="Ucz!" Margin="141,10,238,10" Click="learn_button_Click" Height="20"/>
                     </StackPanel>
                 </GroupBox>
 
                 <GroupBox Header="Rozpoznawanie kształtów" Grid.Row="1" Grid.Column="0" Margin="10,10,10,0">
-                    <StackPanel x:Name="stack1" Orientation="Horizontal" Margin="0,0,0,-93">
-                        <Border BorderThickness="3" BorderBrush="Black" Margin="25, 0, 5, 100" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <StackPanel x:Name="stack1" Orientation="Horizontal" Margin="2,-30,-2,-95">
+                        <Border BorderThickness="3" BorderBrush="Black" Margin="20, 10, 5, 100" HorizontalAlignment="Left" VerticalAlignment="Center">
                             <Canvas  x:Name="Canvas2" />
                         </Border>
-                        <Button x:Name="Symulation_butt" Content="Symuluj" Width="65" Margin="100,76,0,169" RenderTransformOrigin="0.5,0.5" Click="Symulation_butt_Click">
+                        <Button x:Name="Symulation_butt" Content="Symuluj" Width="65" Margin="100,76,0,213" RenderTransformOrigin="0.5,0.5" Click="Symulation_butt_Click">
                             <Button.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -104,7 +108,7 @@
                             </Button.RenderTransform>
                         </Button>
 
-                        <Button x:Name="clearbutt" Content="Wyczyść" Width="65" Margin="-65,117,0,128" RenderTransformOrigin="0.5,0.5" Click="clearbutt_Click">
+                        <Button x:Name="clearbutt" Content="Wyczyść" Width="65" Margin="-65,117,0,170" RenderTransformOrigin="0.5,0.5" Click="clearbutt_Click">
                             <Button.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -115,7 +119,7 @@
                             </Button.RenderTransform>
                         </Button>
 
-                        <Border BorderThickness="3" BorderBrush="Black" Margin="100,5,0,100" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border BorderThickness="3" BorderBrush="Black" Margin="100,15,0,100" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Canvas  x:Name="Canvas3" />
                         </Border>
 
