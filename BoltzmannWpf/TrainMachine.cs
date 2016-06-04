@@ -82,8 +82,8 @@ namespace BoltzmannMachine
 
         public void train(Matrix<double> data, int epochs, double learn_rate)
         {
-            Matrix<double> pos_hidden_activations, pos_hidden_probs, pos_hidden_states, pos_associations,
-                neg_visible_activations, neg_visible_probs, neg_hidden_activations, neg_hidden_probs, neg_associations;
+            Matrix<double> firststep_activations, firststep_probs, firststep_states, positive_assoc,
+                secondstep_activations, secondstep_probs, thirdstep_activations, thirdstep_probs, negative_assoc;
 
             learning_rate = learn_rate;            
             num_examples = data.RowCount;
@@ -92,36 +92,35 @@ namespace BoltzmannMachine
             for (int iter = 0; iter < epochs; iter++)
             {
                 //Init state
-                pos_hidden_activations = data.Multiply(weights);                
-                pos_hidden_probs = DenseMatrix.OfArray(logisticMatrix(pos_hidden_activations));
+                firststep_activations = data.Multiply(weights);                
+                firststep_probs = DenseMatrix.OfArray(logisticMatrix(firststep_activations));
                 
-                double[,] tmp_states = new double[pos_hidden_probs.RowCount, pos_hidden_probs.ColumnCount];
-                for (int i = 0; i < pos_hidden_probs.RowCount; i++)
+                double[,] tmp_states = new double[firststep_probs.RowCount, firststep_probs.ColumnCount];
+                for (int i = 0; i < firststep_probs.RowCount; i++)
                 {
-                    for (int j = 0; j < pos_hidden_probs.ColumnCount; j++)
+                    for (int j = 0; j < firststep_probs.ColumnCount; j++)
                     {
-                        //double a = Normal.WithMeanStdDev(0.5, 0.5).Sample();
-                        tmp_states[i, j] = pos_hidden_probs.At(i, j) > 0.5 ? 1 : 0;
+                        tmp_states[i, j] = firststep_probs.At(i, j) > 0.5 ? 1 : 0;
                     }
                 }
-                pos_hidden_states = DenseMatrix.OfArray(tmp_states);
-                pos_associations = data.Transpose().Multiply(pos_hidden_probs);                
+                firststep_states = DenseMatrix.OfArray(tmp_states);
+                positive_assoc = data.Transpose().Multiply(firststep_probs);                
                 
                 //reconstruction state
-                neg_visible_activations = pos_hidden_states.Multiply(weights.Transpose());                
+                secondstep_activations = firststep_states.Multiply(weights.Transpose());                
 
-                double[,] tmp_neg = logisticMatrix( neg_visible_activations);
-                for (int i = 0; i < neg_visible_activations.RowCount; i++)
+                double[,] tmp_neg = logisticMatrix( secondstep_activations);
+                for (int i = 0; i < secondstep_activations.RowCount; i++)
                 {
                     tmp_neg[i, 0] = 1;
                 }
 
-                neg_visible_probs = DenseMatrix.OfArray(tmp_neg);
-                                neg_hidden_activations = neg_visible_probs.Multiply(weights);              
-                neg_hidden_probs = DenseMatrix.OfArray(logisticMatrix(neg_hidden_activations));                
-                neg_associations = neg_visible_probs.Transpose().Multiply(neg_hidden_probs);
+                secondstep_probs = DenseMatrix.OfArray(tmp_neg);
+                thirdstep_activations = secondstep_probs.Multiply(weights);              
+                thirdstep_probs = DenseMatrix.OfArray(logisticMatrix(thirdstep_activations));                
+                negative_assoc = secondstep_probs.Transpose().Multiply(thirdstep_probs);
                                 
-                weights = pos_associations.Subtract(neg_associations).Divide(num_examples).Multiply(learning_rate).Add(weights);
+                weights = positive_assoc.Subtract(negative_assoc).Divide(num_examples).Multiply(learning_rate).Add(weights);
             }
         }
 
@@ -141,7 +140,6 @@ namespace BoltzmannMachine
             double[] tmp_states = new double[hidden_probs.ColumnCount];
             for (int i = 1; i < hidden_probs.ColumnCount; i++)
             {
-                //double a = Normal.WithMeanStdDev(0.5, 0.5).Sample();
                 tmp_states[i] = hidden_probs.At(0,i) > 0.5 ? 1 : 0;
             }
             tmp_states[0] = 1;
@@ -160,7 +158,6 @@ namespace BoltzmannMachine
             double[] tmp_states = new double[visible_probs.ColumnCount - 1];
             for (int i = 1; i < visible_probs.ColumnCount; i++)
             {
-                //double a = Normal.WithMeanStdDev(0.5, 0.5).Sample();
                 tmp_states[i-1] = visible_probs.At(0, i) > 0.5 ? 1 : 0;
             }
 

@@ -6,16 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace BoltzmannWpf
@@ -112,6 +106,7 @@ namespace BoltzmannWpf
                 MessageBox.Show("Wybierz plik uczący","Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void DeletePatternsButton_Click(object sender, RoutedEventArgs e)
         {
             if (patternFilePath != "")
@@ -121,9 +116,7 @@ namespace BoltzmannWpf
             {
                 MessageBox.Show("Wybierz plik uczący", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        
+        }        
 
         private void pickfile_Click(object sender, RoutedEventArgs e)
         {
@@ -141,9 +134,7 @@ namespace BoltzmannWpf
                 using (StreamReader sr = new StreamReader(patternFilePath))
                 {
                     // Read the stream to a string, and write the string to the console.
-                    lines = sr.ReadToEnd().Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-                  
+                    lines = sr.ReadToEnd().Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);                  
 
                     for (int i = 0; i < lines.Count(); i++)
                     {
@@ -165,14 +156,11 @@ namespace BoltzmannWpf
             }
             else
                 MessageBox.Show("Wybierz plik uczący");
-
-
         }
 
 
         private void learn_button_Click(object sender, RoutedEventArgs e)
         {
-
             if (patternFilePath != "")
             {
                 tr = new TrainMachine(canvasRowsAndColumns * canvasRowsAndColumns, sliderhiddenval);
@@ -184,38 +172,25 @@ namespace BoltzmannWpf
 
                 for (int i = 0; i < lines.Count(); i++)
                 {
-
-                    pom = 0;
-
-                    
+                    pom = 0;                    
                     for (int z = 0; z < canvasRowsAndColumns; z++)
                     {
-
                         for (int y = 0; y < canvasRowsAndColumns; y++)
                         {
-
                                 todata[z, y] = Convert.ToDouble(lines.ElementAt(i).ElementAt(pom).ToString());
                                 alldata[i, pom] = todata[z, y];
-                                pom++;
-                         
+                                pom++;                         
                         }
                     }
-
-
                 }
-
                 data = DenseMatrix.OfArray(alldata);
 
                 tr.train(data, sliderrepeat, sliderspeed);
                 click_pom = 1;
                 MessageBox.Show("Nauczono");
-
-
-
             }
             else
                 MessageBox.Show("Wybierz plik uczący");
-
         }
         //tab2
         private void clearbutt_Click(object sender, RoutedEventArgs e)
@@ -225,7 +200,6 @@ namespace BoltzmannWpf
 
             Canvas3.Children.Clear();
             setupCanvaswithcolor(Canvas3, new double[canvasRowsAndColumns * canvasRowsAndColumns]);
-
         }
 
         private void Symulation_butt_Click(object sender, RoutedEventArgs e)
@@ -239,21 +213,13 @@ namespace BoltzmannWpf
                 for (int i = 0; i < tabletosim.Count(); i++)
                     tabletosim[i] = canvasList.ElementAt(i);
 
-
-
-                double[] result = (double[])DenseVector.OfArray(tr.simulation(tabletosim));
-
-
+                double[] result = tr.simulation(tabletosim);
                 Canvas3.Children.Clear();
-
                 setupCanvaswithcolor(Canvas3, result);
             }
             else
                 MessageBox.Show("Naucz sieć");
-           
-
         }
-
         #endregion
 
         #region Changed Methods
@@ -301,8 +267,7 @@ namespace BoltzmannWpf
                 setupCanvas(Canvas1);
             }
         }
-
-     
+             
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -321,14 +286,9 @@ namespace BoltzmannWpf
                     // setupCanvas(Canvas2);
                     //  setupCanvas(Canvas3);
                 }
-
-
-
             }
             catch(Exception w)
             {
-
-
             }
         }
         #endregion
@@ -430,13 +390,5 @@ namespace BoltzmannWpf
             }
         }
         #endregion
-
-      
-
-       
-
-        
-
-       
     }
 }
